@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acesso ao Portal</title>
+  <link rel="stylesheet" href="/public/css/base.css">
+  <link rel="stylesheet" href="/public/css/components.css">
+</head>
+<body class="center">
+  <main class="card login">
+    <h1>Portal Contábil</h1>
+    <p class="muted">Acesse com o login fornecido pela sua contabilidade.</p>
+    <form id="form">
+      <label>E-mail
+        <input type="email" name="email" required autocomplete="username">
+      </label>
+      <label>Senha
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <p class="msg" id="msg" role="alert" hidden></p>
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+  </main>
+  <script type="module" src="/public/js/login.js"></script>
+</body>
+</html>

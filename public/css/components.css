@@ -1,0 +1,66 @@
+/* Cartões, botões, formulários, tabelas e avisos */
+.card {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--surf);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+
+.login { width: min(380px, 100%); margin: 0; padding: 24px; }
+.login form { display: grid; gap: 12px; margin-top: 16px; }
+
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--acc);
+  color: var(--onacc);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn.alt    { background: transparent; color: var(--ink); border-color: var(--rule); }
+.btn.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+.btn.small  { padding: 4px 9px; font-size: .85em; }
+.btn:disabled { opacity: .6; cursor: wait; }
+.btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+label { display: grid; gap: 3px; font-size: .85em; color: var(--mut); }
+label.check { display: flex; align-items: center; gap: 6px; }
+input, select {
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  background: var(--surf);
+  color: var(--ink);
+  font: inherit;
+}
+input[type="checkbox"] { width: auto; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+table { width: 100%; border-collapse: collapse; min-width: 640px; }
+th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th { font-size: .8em; font-weight: 700; color: var(--mut); border-bottom: 2px solid var(--ink); }
+td.nm { white-space: normal; min-width: 180px; }
+tbody tr:nth-child(even) { background: var(--bg); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+tfoot td { font-weight: 700; border-bottom: 0; }
+.empty { padding: 20px 0; color: var(--mut); }
+
+.badge { padding: 2px 8px; border-radius: 10px; font-size: .85em; border: 1px solid currentColor; }
+.badge.ok  { color: var(--ok); }
+.badge.off { color: var(--danger); }
+
+.msg { margin: 0; color: var(--danger); }
+.msg.good { color: var(--ok); }
+.creds { padding: 10px 12px; border: 1px dashed var(--acc); border-radius: 6px; word-break: break-all; }

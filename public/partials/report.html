@@ -1,0 +1,70 @@
+<div class="report">
+  <section class="card">
+    <div class="report-head">
+      <h1>Relatório de Entradas/Compras</h1>
+      <button class="btn alt noprint" id="print" type="button">Imprimir / salvar PDF</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Cliente:</h2>
+    <dl class="info" id="dest"></dl>
+  </section>
+
+  <section class="card">
+    <h2>Notas Fiscais Entradas [Filtros]</h2>
+    <div class="filters noprint">
+      <label>Emissão de<input type="date" id="de"></label>
+      <label>Emissão até<input type="date" id="ate"></label>
+      <label>UF do fornecedor<select id="uf"></select></label>
+      <label>Valor mínimo<input type="number" id="min" min="0" step="0.01" placeholder="0,00"></label>
+      <label>Valor máximo<input type="number" id="max" min="0" step="0.01" placeholder="0,00"></label>
+      <label>Fornecedor (nome ou CNPJ)<input type="search" id="q"></label>
+      <button class="btn alt" id="clear" type="button">Limpar filtros</button>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Data de emissão</th>
+            <th>Nº da NF</th>
+            <th>CNPJ do emitente</th>
+            <th>Nome do emitente</th>
+            <th>UF</th>
+            <th class="num">Valor total</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+        <tfoot id="foot"></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Ranking De Fornecedores</h2>
+    <p class="caption">Calculado sobre as notas exibidas na tabela acima, em ordem de montante comprado.</p>
+    <div class="scroll ranking">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fornecedor</th>
+            <th>CNPJ</th>
+            <th>UF</th>
+            <th class="num">Compras</th>
+            <th class="num">Montante</th>
+            <th class="num">Participação</th>
+          </tr>
+        </thead>
+        <tbody id="rank"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Evolução Das Compras No Mês</h2>
+    <label class="month-select">Mês<select id="mes"></select></label>
+    <p class="caption" id="chcap"></p>
+    <div class="scroll" id="chart"></div>
+  </section>
+</div>

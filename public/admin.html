@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel ADM</title>
+  <link rel="stylesheet" href="/public/css/base.css">
+  <link rel="stylesheet" href="/public/css/components.css">
+  <link rel="stylesheet" href="/public/css/report.css">
+  <link rel="stylesheet" href="/public/css/print.css" media="print">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <strong class="grow">Portal Contábil · ADM</strong>
+    <span class="muted" id="who"></span>
+    <button class="btn alt small" id="logout" type="button">Sair</button>
+  </header>
+
+  <main class="wrap">
+    <section class="card noprint">
+      <h2>Clientes</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Razão social</th>
+              <th>CNPJ/CPF</th>
+              <th>E-mail de acesso</th>
+              <th>Acesso</th>
+              <th class="num">Notas</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="clients"></tbody>
+        </table>
+      </div>
+      <p><button class="btn" id="new" type="button">Novo cliente</button></p>
+    </section>
+
+    <section class="card noprint" id="formCard" hidden>
+      <h2 id="formTitle">Novo cliente</h2>
+      <form id="form">
+        <div class="grid">
+          <label>Razão social<input id="f_nome" required></label>
+          <label>CNPJ/CPF<input id="f_doc" required inputmode="numeric"></label>
+          <label>E-mail de acesso<input id="f_email" type="email" required autocomplete="off"></label>
+          <label>Senha<input id="f_password" type="text" autocomplete="off"><small id="pwHint"></small></label>
+          <label>Inscrição estadual<input id="f_ie"></label>
+          <label>Endereço<input id="f_lgr"></label>
+          <label>Número<input id="f_nro"></label>
+          <label>Complemento<input id="f_cpl"></label>
+          <label>Bairro<input id="f_bairro"></label>
+          <label>Município<input id="f_mun"></label>
+          <label>UF<input id="f_uf" maxlength="2"></label>
+          <label>CEP<input id="f_cep"></label>
+          <label>Telefone<input id="f_fone"></label>
+        </div>
+        <p class="actions">
+          <label class="check"><input type="checkbox" id="f_active" checked> Acesso liberado</label>
+          <label class="check" id="genRow" hidden><input type="checkbox" id="f_gen"> Gerar nova senha</label>
+        </p>
+        <p class="creds" id="creds" hidden></p>
+        <p class="msg" id="formMsg" role="alert" hidden></p>
+        <div class="actions">
+          <button class="btn" type="submit">Salvar</button>
+          <button class="btn alt" type="button" id="cancel">Fechar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card noprint" id="importCard" hidden>
+      <h2 id="importTitle">Importar XMLs</h2>
+      <p class="muted">Envie um .zip ou vários XMLs de NF-e. Só entram as notas emitidas para o CNPJ/CPF deste cliente; notas repetidas são ignoradas.</p>
+      <div class="actions">
+        <label class="btn" for="file">Escolher arquivos</label>
+        <input id="file" type="file" accept=".zip,.xml,application/zip,text/xml" multiple hidden>
+        <button class="btn danger" id="clearNotes" type="button">Apagar histórico do cliente</button>
+      </div>
+      <p class="msg" id="importMsg" role="status" hidden></p>
+    </section>
+
+    <div id="report" hidden></div>
+  </main>
+
+  <script type="module" src="/public/js/admin.js"></script>
+</body>
+</html>
