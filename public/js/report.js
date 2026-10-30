@@ -4,7 +4,7 @@ import { $, esc, brl, compact, percent, fmtDate, fmtDoc } from './util.js';
 const FILTER_IDS = ['de', 'ate', 'uf', 'min', 'max', 'q'];
 
 export async function mountReport(root) {
-  root.innerHTML = await (await fetch('/partials/report.html')).text();
+  root.innerHTML = await (await fetch('partials/report.html')).text();
   const el = (id) => $(`#${id}`, root);
   let profile = null;
   let notes = [];
