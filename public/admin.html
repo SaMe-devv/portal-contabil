@@ -3,104 +3,267 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Painel ADM</title>
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#00509E">
+  <title>Painel do escritório | SaMe Contabilidade</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="css/report.css">
   <link rel="stylesheet" href="css/print.css" media="print">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="vendor/jszip-3.10.1.min.js" defer></script>
+  <script src="vendor/qrcode.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <strong class="grow">Portal Contábil · ADM</strong>
-    <span class="muted" id="who"></span>
-    <button class="btn alt small" id="logout" type="button">Sair</button>
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+  <header class="topo">
+    <div class="wrap">
+      <span class="marca"><svg aria-hidden="true"><use href="img/icons.svg#logo"/></svg><span>SaMe<small>Contabilidade</small></span></span>
+      <span class="area">Escritório</span>
+      <div class="usuario">
+        <span class="quem" id="who"></span>
+        <div class="menu">
+          <button class="btn btn-contorno btn-sm" id="menuBt" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuLista">
+            <svg aria-hidden="true"><use href="img/icons.svg#i-user"/></svg><span>Minha conta</span>
+          </button>
+          <div class="menu-lista" id="menuLista" hidden>
+            <button type="button" id="mSenha"><svg aria-hidden="true"><use href="img/icons.svg#i-key"/></svg>Trocar senha</button>
+            <button type="button" id="m2fa"><svg aria-hidden="true"><use href="img/icons.svg#i-lock"/></svg>Verificação em duas etapas</button>
+            <button type="button" id="mTodos"><svg aria-hidden="true"><use href="img/icons.svg#i-shield"/></svg>Sair de todos os aparelhos</button>
+            <hr>
+            <button type="button" id="mSair"><svg aria-hidden="true"><use href="img/icons.svg#i-logout"/></svg>Sair</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <main class="wrap">
-    <section class="card noprint">
-      <h2>Clientes</h2>
-      <div class="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Razão social</th>
-              <th>CNPJ/CPF</th>
-              <th>E-mail de acesso</th>
-              <th>Acesso</th>
-              <th class="num">Notas</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="clients"></tbody>
-        </table>
-      </div>
-      <p><button class="btn" id="new" type="button">Novo cliente</button></p>
-    </section>
+  <main class="wrap pagina" id="conteudo">
+    <div class="aviso alerta faixa-2fa noprint" id="aviso2fa" hidden>
+      <span>Sua conta acessa os dados e certificados de todos os clientes. Ative a verificação em duas etapas para que só você consiga entrar, mesmo que alguém descubra a senha.</span>
+      <button class="btn btn-sm btn-laranja" type="button" id="ir2fa">Ativar agora</button>
+    </div>
 
-    <section class="card noprint">
-      <h2>Importação em lote</h2>
-      <p class="muted">Envie um .zip (ou vários XMLs) com notas de vários clientes. Cada nota vai para o cliente cujo CNPJ/CPF é o destinatário. Notas repetidas são ignoradas.</p>
-      <div class="actions">
-        <label class="btn" for="batchFile">Escolher arquivos</label>
-        <input id="batchFile" type="file" accept=".zip,.xml,application/zip,text/xml" multiple hidden>
-        <button class="btn alt" id="batchPending" type="button" hidden>Importar pendentes</button>
+    <div id="viewPainel">
+      <div class="cab-pagina">
+        <h1>Painel do escritório</h1>
+        <p class="lead" id="resumoGeral"></p>
       </div>
-      <p class="msg" id="batchMsg" role="status" hidden></p>
-      <div class="scroll" id="batchResult" hidden>
-        <table>
-          <thead>
-            <tr><th>Destinatário</th><th>CNPJ/CPF</th><th class="num">Notas</th><th>Situação</th></tr>
-          </thead>
-          <tbody id="batchRows"></tbody>
-        </table>
-      </div>
-    </section>
 
-    <section class="card noprint" id="formCard" hidden>
-      <h2 id="formTitle">Novo cliente</h2>
-      <form id="form">
-        <div class="grid">
-          <label>Razão social<input id="f_nome" required></label>
-          <label>CNPJ/CPF<input id="f_doc" required inputmode="numeric"></label>
-          <label>E-mail de acesso<input id="f_email" type="email" required autocomplete="off"></label>
-          <label>Senha<input id="f_password" type="text" autocomplete="off"><small id="pwHint"></small></label>
-          <label>Inscrição estadual<input id="f_ie"></label>
-          <label>Endereço<input id="f_lgr"></label>
-          <label>Número<input id="f_nro"></label>
-          <label>Complemento<input id="f_cpl"></label>
-          <label>Bairro<input id="f_bairro"></label>
-          <label>Município<input id="f_mun"></label>
-          <label>UF<input id="f_uf" maxlength="2"></label>
-          <label>CEP<input id="f_cep"></label>
-          <label>Telefone<input id="f_fone"></label>
+      <div class="abas" role="tablist" aria-label="Seções do painel">
+        <button class="aba" role="tab" id="tab-clientes" aria-controls="p-clientes" aria-selected="true">Clientes</button>
+        <button class="aba" role="tab" id="tab-importar" aria-controls="p-importar" aria-selected="false">Importar XMLs</button>
+        <button class="aba" role="tab" id="tab-sefaz" aria-controls="p-sefaz" aria-selected="false">Busca na SEFAZ</button>
+        <button class="aba" role="tab" id="tab-seguranca" aria-controls="p-seguranca" aria-selected="false">Segurança</button>
+      </div>
+
+      <!-- CLIENTES -->
+      <section class="painel" role="tabpanel" id="p-clientes" aria-labelledby="tab-clientes">
+        <div class="barra">
+          <label class="busca"><span class="sr">Buscar cliente</span><svg aria-hidden="true"><use href="img/icons.svg#i-search"/></svg><input type="search" id="buscaCli" placeholder="Buscar por nome, CNPJ/CPF ou e-mail"></label>
+          <button class="btn" id="novo" type="button"><svg aria-hidden="true"><use href="img/icons.svg#i-plus"/></svg>Novo cliente</button>
         </div>
-        <p class="actions">
-          <label class="check"><input type="checkbox" id="f_active" checked> Acesso liberado</label>
-          <label class="check" id="genRow" hidden><input type="checkbox" id="f_gen"> Gerar nova senha</label>
-        </p>
-        <p class="creds" id="creds" hidden></p>
-        <p class="msg" id="formMsg" role="alert" hidden></p>
-        <div class="actions">
-          <button class="btn" type="submit">Salvar</button>
-          <button class="btn alt" type="button" id="cancel">Fechar</button>
+        <div class="rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>CNPJ/CPF</th>
+                <th>Acesso</th>
+                <th>Certificado A1</th>
+                <th class="num">Notas</th>
+                <th>Último acesso</th>
+                <th><span class="sr">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody id="clients"><tr><td colspan="7" class="vazio">Carregando…</td></tr></tbody>
+          </table>
         </div>
-      </form>
-    </section>
+      </section>
 
-    <section class="card noprint" id="importCard" hidden>
-      <h2 id="importTitle">Importar XMLs</h2>
-      <p class="muted">Envie um .zip ou vários XMLs de NF-e. Só entram as notas emitidas para o CNPJ/CPF deste cliente; notas repetidas são ignoradas.</p>
-      <div class="actions">
-        <label class="btn" for="file">Escolher arquivos</label>
-        <input id="file" type="file" accept=".zip,.xml,application/zip,text/xml" multiple hidden>
-        <button class="btn danger" id="clearNotes" type="button">Apagar histórico do cliente</button>
-      </div>
-      <p class="msg" id="importMsg" role="status" hidden></p>
-    </section>
+      <!-- IMPORTAR -->
+      <section class="painel" role="tabpanel" id="p-importar" aria-labelledby="tab-importar" hidden>
+        <div class="duas-col">
+          <div>
+            <h2>Importar XMLs manualmente</h2>
+            <p class="lead">Envie um .zip ou vários XMLs de NF-e, NFC-e, CT-e e NFS-e, de um ou de vários clientes. Cada nota vai para o cliente que aparece como destinatário/tomador (entrada) ou emitente (saída). Notas repetidas são ignoradas.</p>
+            <p class="muted small">Use esta opção para as notas de saída e para clientes sem certificado A1. As notas de entrada dos clientes com certificado chegam sozinhas pela busca na SEFAZ.</p>
+          </div>
+          <label class="soltar" id="soltar" for="batchFile">
+            <svg aria-hidden="true"><use href="img/icons.svg#i-upload"/></svg>
+            <strong>Escolher arquivos</strong>
+            <span>ou arraste o .zip / XMLs para cá</span>
+            <input id="batchFile" type="file" accept=".zip,.xml,application/zip,text/xml" multiple>
+          </label>
+        </div>
+        <p class="aviso" id="batchMsg" role="status" hidden></p>
+        <div class="rolagem" id="batchResult" hidden>
+          <table>
+            <thead><tr><th>Empresa</th><th>CNPJ/CPF</th><th class="num">Notas</th><th>Situação</th></tr></thead>
+            <tbody id="batchRows"></tbody>
+          </table>
+        </div>
+        <p class="acoes"><button class="btn btn-contorno" id="batchPending" type="button" hidden>Importar pendentes</button></p>
+      </section>
 
-    <div id="report" hidden></div>
+      <!-- SEFAZ -->
+      <section class="painel" role="tabpanel" id="p-sefaz" aria-labelledby="tab-sefaz" hidden>
+        <div class="duas-col">
+          <div>
+            <h2>Busca automática na SEFAZ</h2>
+            <p class="lead">Às 6h e às 18h o portal consulta a Distribuição DF-e da SEFAZ com o certificado A1 de cada cliente e traz as NF-e e CT-e emitidas contra ele (entradas). A SEFAZ guarda as notas por 90 dias; a primeira busca traz esse período.</p>
+          </div>
+          <div class="nota-lateral">
+            <h3>Ciência da operação</h3>
+            <p>Sem ciência, a SEFAZ entrega só o resumo da NF-e (valor, emitente, data): o relatório funciona, mas o XML fica incompleto. Com a ciência automática, o portal registra o evento 210210 em nome do cliente e o XML completo chega na busca seguinte.</p>
+            <p class="muted small">A ciência não confirma nem recusa a operação; ela só informa à SEFAZ que o cliente tomou conhecimento da nota. Ative apenas com o consentimento do cliente.</p>
+          </div>
+        </div>
+        <div class="rolagem">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Certificado A1</th>
+                <th>Busca</th>
+                <th>Ciência automática</th>
+                <th>Última busca</th>
+                <th><span class="sr">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody id="syncRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SEGURANÇA -->
+      <section class="painel" role="tabpanel" id="p-seguranca" aria-labelledby="tab-seguranca" hidden>
+        <div class="duas-col">
+          <div>
+            <h2>Verificação em duas etapas</h2>
+            <p class="lead" id="tfaStatus"></p>
+            <div class="acoes" id="tfaAcoes"></div>
+          </div>
+          <div class="tfa" id="tfaSetup" hidden>
+            <div class="qr" id="qr"></div>
+            <div class="tfa-passos">
+              <ol>
+                <li>Instale o Google Authenticator, Microsoft Authenticator ou Authy no celular.</li>
+                <li>Leia o QR Code ao lado. Sem câmera? Digite a chave: <code id="tfaSecret"></code></li>
+                <li>Digite o código de 6 números que aparece no aplicativo.</li>
+              </ol>
+              <form class="campo" id="tfaForm">
+                <label for="tfaCode">Código do aplicativo</label>
+                <div class="acoes"><input id="tfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="input-codigo"><button class="btn" type="submit">Ativar</button></div>
+              </form>
+            </div>
+          </div>
+          <form class="tfa-off" id="tfaOff" hidden>
+            <h3>Desativar verificação</h3>
+            <div class="grade">
+              <div class="campo"><label for="offPass">Senha</label><input id="offPass" type="password" autocomplete="current-password"></div>
+              <div class="campo"><label for="offCode">Código do aplicativo</label><input id="offCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></div>
+            </div>
+            <div class="acoes"><button class="btn btn-perigo" type="submit">Desativar</button><button class="btn btn-contorno" type="button" id="tfaOffCancel">Cancelar</button></div>
+          </form>
+        </div>
+        <p class="aviso" id="tfaMsg" role="status" hidden></p>
+
+        <div class="bloco">
+          <div class="bloco-cab">
+            <div><h2>Atividade recente</h2><p>Entradas, tentativas recusadas e alterações feitas no portal. O histórico fica guardado por 1 ano.</p></div>
+            <button class="btn btn-contorno btn-sm" type="button" id="recarregarLog"><svg aria-hidden="true"><use href="img/icons.svg#i-refresh"/></svg>Atualizar</button>
+          </div>
+          <div class="rolagem">
+            <table>
+              <thead><tr><th>Quando</th><th>Quem</th><th>O que aconteceu</th><th>Cliente</th><th>Detalhe</th><th>IP</th></tr></thead>
+              <tbody id="logRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- RELATÓRIO DE UM CLIENTE -->
+    <div id="viewReport" hidden>
+      <p class="noprint voltar"><button class="btn btn-contorno btn-sm" type="button" id="fecharRel">Voltar para clientes</button></p>
+      <div id="report"></div>
+    </div>
   </main>
+
+  <!-- Janela: cadastro/edição de cliente -->
+  <dialog id="dlgCliente" aria-labelledby="formTitle">
+    <form class="janela" id="form" method="dialog" novalidate>
+      <div class="janela-cab">
+        <div><h2 id="formTitle">Novo cliente</h2><p id="formSub">O cliente recebe uma senha provisória e escolhe a dele no primeiro acesso.</p></div>
+        <button class="btn btn-contorno btn-icone" type="button" data-fechar aria-label="Fechar"><svg aria-hidden="true"><use href="img/icons.svg#i-x"/></svg></button>
+      </div>
+      <div class="grade">
+        <div class="campo largo"><label for="f_nome">Razão social</label><input id="f_nome" required></div>
+        <div class="campo"><label for="f_doc">CNPJ ou CPF</label><input id="f_doc" required autocapitalize="characters"></div>
+        <div class="campo"><label for="f_email">E-mail de acesso</label><input id="f_email" type="email" required autocomplete="off"></div>
+        <div class="campo"><label for="f_ie">Inscrição estadual</label><input id="f_ie"></div>
+        <div class="campo"><label for="f_fone">Telefone</label><input id="f_fone" inputmode="tel"></div>
+        <div class="campo dois"><label for="f_lgr">Endereço</label><input id="f_lgr"></div>
+        <div class="campo"><label for="f_nro">Número</label><input id="f_nro"></div>
+        <div class="campo"><label for="f_cpl">Complemento</label><input id="f_cpl"></div>
+        <div class="campo"><label for="f_bairro">Bairro</label><input id="f_bairro"></div>
+        <div class="campo"><label for="f_mun">Município</label><input id="f_mun"></div>
+        <div class="campo"><label for="f_uf">UF</label><input id="f_uf" maxlength="2" autocapitalize="characters"></div>
+        <div class="campo"><label for="f_cep">CEP</label><input id="f_cep" inputmode="numeric"></div>
+      </div>
+      <fieldset class="grupo">
+        <legend>Acesso ao portal</legend>
+        <label class="check"><input type="checkbox" id="f_active" checked> Acesso liberado</label>
+        <div class="campo" id="pwRow">
+          <label for="f_password">Senha provisória</label>
+          <input id="f_password" type="text" autocomplete="off" spellcheck="false">
+          <small id="pwHint">Deixe em branco para o portal gerar uma senha segura.</small>
+        </div>
+        <label class="check" id="genRow" hidden><input type="checkbox" id="f_gen"> Gerar nova senha provisória (o cliente sai de todos os aparelhos)</label>
+      </fieldset>
+      <div class="credenciais" id="creds" hidden></div>
+      <p class="aviso erro" id="formMsg" role="alert" hidden></p>
+      <div class="rodape">
+        <button class="btn btn-perigo" type="button" id="excluir" hidden>Excluir cliente</button>
+        <button class="btn btn-perigo" type="button" id="limparNotas" hidden>Apagar notas</button>
+        <button class="btn btn-contorno" type="button" data-fechar>Fechar</button>
+        <button class="btn" type="submit" id="salvar">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Janela: certificado A1 -->
+  <dialog id="dlgCert" aria-labelledby="certTitle">
+    <form class="janela" id="certForm" method="dialog" novalidate>
+      <div class="janela-cab">
+        <div><h2 id="certTitle">Certificado A1</h2><p id="certSub"></p></div>
+        <button class="btn btn-contorno btn-icone" type="button" data-fechar aria-label="Fechar"><svg aria-hidden="true"><use href="img/icons.svg#i-x"/></svg></button>
+      </div>
+      <p class="aviso" id="certAtual" hidden></p>
+      <div class="campo">
+        <label for="certFile">Arquivo do certificado (.pfx ou .p12)</label>
+        <input id="certFile" type="file" accept=".pfx,.p12,application/x-pkcs12">
+      </div>
+      <div class="campo">
+        <label for="certPass">Senha do certificado</label>
+        <div class="senha">
+          <input id="certPass" type="password" autocomplete="off">
+          <button type="button" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false"><svg aria-hidden="true"><use href="img/icons.svg#i-eye"/></svg></button>
+        </div>
+        <small>O certificado é guardado criptografado. A senha não é armazenada e o arquivo nunca volta para o navegador.</small>
+      </div>
+      <p class="aviso erro" id="certMsg" role="alert" hidden></p>
+      <div class="rodape">
+        <button class="btn btn-perigo" type="button" id="certRemover" hidden>Remover certificado</button>
+        <button class="btn btn-contorno" type="button" data-fechar>Fechar</button>
+        <button class="btn" type="submit"><svg aria-hidden="true"><use href="img/icons.svg#i-upload"/></svg>Enviar certificado</button>
+      </div>
+    </form>
+  </dialog>
 
   <script type="module" src="js/admin.js"></script>
 </body>

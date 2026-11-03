@@ -3,25 +3,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Acesso ao Portal</title>
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#00509E">
+  <title>Área do cliente | SaMe Contabilidade</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/login.css">
 </head>
-<body class="center">
-  <main class="card login">
-    <h1>Portal Contábil</h1>
-    <p class="muted">Acesse com o login fornecido pela sua contabilidade.</p>
-    <form id="form">
-      <label>E-mail
-        <input type="email" name="email" required autocomplete="username">
-      </label>
-      <label>Senha
-        <input type="password" name="password" required autocomplete="current-password">
-      </label>
-      <p class="msg" id="msg" role="alert" hidden></p>
-      <button class="btn" type="submit">Entrar</button>
-    </form>
-  </main>
+<body>
+  <a class="skip" href="#login">Pular para o login</a>
+  <div class="entrada">
+    <section class="painel-marca" aria-labelledby="titulo">
+      <a class="marca" href="https://samecontabilidade.com.br/" aria-label="SaMe Contabilidade, abrir o site">
+        <svg aria-hidden="true"><use href="img/icons.svg#logo"/></svg>
+        <span>SaMe<small>Contabilidade</small></span>
+      </a>
+      <div>
+        <h1 id="titulo">Suas notas fiscais num só lugar</h1>
+        <p class="lead">Compras, vendas e fretes da sua empresa, buscados na SEFAZ duas vezes por dia e organizados pelo seu contador.</p>
+      </div>
+      <ul>
+        <li><span class="ic-box"><svg aria-hidden="true"><use href="img/icons.svg#i-chart"/></svg></span><div><b>Relatório de compras e vendas</b><span>Filtros por período, fornecedor e tipo de nota</span></div></li>
+        <li><span class="ic-box"><svg aria-hidden="true"><use href="img/icons.svg#i-doc"/></svg></span><div><b>XMLs prontos para baixar</b><span>NF-e e CT-e em um arquivo .zip</span></div></li>
+        <li><span class="ic-box"><svg aria-hidden="true"><use href="img/icons.svg#i-shield"/></svg></span><div><b>Acesso protegido</b><span>Cada empresa vê somente os próprios dados</span></div></li>
+      </ul>
+    </section>
+
+    <main class="lado-form" id="conteudo">
+      <div>
+        <form class="cartao-login" id="login" novalidate>
+          <h2>Entrar</h2>
+          <p>Use o e-mail, CNPJ ou CPF cadastrado no escritório.</p>
+          <div class="campo" id="campoLogin">
+            <label for="f-login">E-mail, CNPJ ou CPF</label>
+            <input id="f-login" name="login" autocomplete="username" autocapitalize="off" spellcheck="false" required>
+          </div>
+          <div class="campo" id="campoSenha">
+            <label for="f-senha">Senha</label>
+            <div class="senha">
+              <input id="f-senha" name="password" type="password" autocomplete="current-password" required>
+              <button type="button" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false"><svg aria-hidden="true"><use href="img/icons.svg#i-eye"/></svg></button>
+            </div>
+          </div>
+          <div class="campo codigo" id="campoCodigo" hidden>
+            <label for="f-codigo">Código do aplicativo autenticador</label>
+            <input id="f-codigo" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}">
+            <small>Abra o Google Authenticator (ou similar) e digite os 6 números.</small>
+          </div>
+          <div class="aviso erro" id="msg" role="alert" hidden></div>
+          <button class="btn" type="submit"><svg aria-hidden="true"><use href="img/icons.svg#i-lock"/></svg><span>Entrar</span></button>
+          <p class="rodape-login">Esqueceu a senha ou ainda não tem acesso? <a href="https://samecontabilidade.com.br/#contato">Fale com o escritório</a>.</p>
+        </form>
+        <p class="privacidade">Seus dados são tratados conforme a LGPD e usados só para a prestação dos serviços contábeis. A sessão é encerrada sozinha após um período sem uso.</p>
+      </div>
+    </main>
+  </div>
   <script type="module" src="js/login.js"></script>
 </body>
 </html>

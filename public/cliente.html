@@ -3,19 +3,49 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Relatório de Entradas/Compras</title>
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#00509E">
+  <title>Minhas notas | SaMe Contabilidade</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="css/app.css">
   <link rel="stylesheet" href="css/report.css">
   <link rel="stylesheet" href="css/print.css" media="print">
+  <script src="vendor/jszip-3.10.1.min.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <strong class="grow">Portal Contábil</strong>
-    <span class="muted" id="who"></span>
-    <button class="btn alt small" id="logout" type="button">Sair</button>
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+  <header class="topo">
+    <div class="wrap">
+      <span class="marca"><svg aria-hidden="true"><use href="img/icons.svg#logo"/></svg><span>SaMe<small>Contabilidade</small></span></span>
+      <span class="area">Área do cliente</span>
+      <div class="usuario">
+        <span class="quem" id="who"></span>
+        <div class="menu">
+          <button class="btn btn-contorno btn-sm" id="menuBt" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuLista">
+            <svg aria-hidden="true"><use href="img/icons.svg#i-user"/></svg><span>Minha conta</span>
+          </button>
+          <div class="menu-lista" id="menuLista" hidden>
+            <button type="button" id="mSenha"><svg aria-hidden="true"><use href="img/icons.svg#i-key"/></svg>Trocar senha</button>
+            <button type="button" id="mTodos"><svg aria-hidden="true"><use href="img/icons.svg#i-shield"/></svg>Sair de todos os aparelhos</button>
+            <hr>
+            <button type="button" id="mSair"><svg aria-hidden="true"><use href="img/icons.svg#i-logout"/></svg>Sair</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </header>
-  <main class="wrap" id="report"></main>
+  <main class="wrap pagina" id="conteudo">
+    <div id="report"><p class="vazio">Carregando suas notas…</p></div>
+  </main>
+  <footer class="rodape-site">
+    <div class="wrap">
+      <span>SaMe Contabilidade · Portal do cliente</span>
+      <span>Dúvidas sobre as notas? <a href="https://samecontabilidade.com.br/#contato">Fale com o escritório</a></span>
+    </div>
+  </footer>
   <script type="module" src="js/cliente.js"></script>
 </body>
 </html>

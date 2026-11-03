@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#00509E">
+  <title>Trocar senha | SaMe Contabilidade</title>
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <div class="entrada">
+    <section class="painel-marca" aria-labelledby="titulo">
+      <span class="marca">
+        <svg aria-hidden="true"><use href="img/icons.svg#logo"/></svg>
+        <span>SaMe<small>Contabilidade</small></span>
+      </span>
+      <div>
+        <h1 id="titulo">Crie a sua senha pessoal</h1>
+        <p class="lead" id="motivo">A senha que você recebeu do escritório é provisória. Escolha uma que só você conheça.</p>
+      </div>
+    </section>
+
+    <main class="lado-form">
+      <form class="cartao-login" id="form" novalidate>
+        <h2>Trocar senha</h2>
+        <p>Ao salvar, os outros aparelhos conectados com a sua conta saem automaticamente.</p>
+        <input type="text" name="username" id="f-user" autocomplete="username" hidden>
+        <div class="campo">
+          <label for="f-atual">Senha atual</label>
+          <div class="senha">
+            <input id="f-atual" type="password" autocomplete="current-password" required>
+            <button type="button" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false"><svg aria-hidden="true"><use href="img/icons.svg#i-eye"/></svg></button>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="f-nova">Nova senha</label>
+          <div class="senha">
+            <input id="f-nova" type="password" autocomplete="new-password" required aria-describedby="regras">
+            <button type="button" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false"><svg aria-hidden="true"><use href="img/icons.svg#i-eye"/></svg></button>
+          </div>
+          <div class="medidor" aria-hidden="true"><i id="barra"></i></div>
+          <ul class="regras" id="regras">
+            <li data-r="len">Pelo menos 10 caracteres</li>
+            <li data-r="mix">Letras e números</li>
+          </ul>
+        </div>
+        <div class="campo">
+          <label for="f-conf">Repita a nova senha</label>
+          <input id="f-conf" type="password" autocomplete="new-password" required>
+        </div>
+        <div class="aviso erro" id="msg" role="alert" hidden></div>
+        <button class="btn" type="submit"><svg aria-hidden="true"><use href="img/icons.svg#i-lock"/></svg><span>Salvar nova senha</span></button>
+        <p class="rodape-login"><a href="#" id="voltar">Voltar</a> · <a href="#" id="sair">Sair</a></p>
+      </form>
+    </main>
+  </div>
+  <script type="module" src="js/senha.js"></script>
+</body>
+</html>

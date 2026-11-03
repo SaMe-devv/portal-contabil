@@ -1,25 +1,25 @@
 import { api, goHome } from './api.js';
 import { mountReport } from './report.js';
-import { $ } from './util.js';
+import { $, esc } from './util.js';
+import { accountMenu, idleLogout } from './ui.js';
 
 async function init() {
   try {
     const user = await api('/api/me');
     if (user.role === 'adm') return location.replace('/admin.html');
+    if (user.mustChange) return location.replace('/senha.html');
     $('#who').textContent = user.nome || user.email;
+    accountMenu();
+    idleLogout(120);
 
     const report = await mountReport($('#report'));
-    const { profile, notes } = await api('/api/report');
-    report.render(profile, notes);
+    const { profile, notes, sync } = await api('/api/report');
+    report.render(profile, notes, sync);
   } catch (error) {
     if (error.status === 401) goHome();
-    else $('#report').innerHTML = `<p class="msg">${error.message}</p>`;
+    else $('#report').innerHTML = `<p class="aviso erro">${esc(error.message)}</p>`;
   }
+  return undefined;
 }
-
-$('#logout').addEventListener('click', async () => {
-  await api('/api/logout', { method: 'POST' }).catch(() => {});
-  goHome();
-});
 
 init();

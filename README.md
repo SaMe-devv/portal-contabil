@@ -1,62 +1,82 @@
-# Portal Contábil (Vercel)
+# Portal do Cliente SaMe Contabilidade (Vercel)
 
-Relatório de Entradas/Compras a partir de NF-e (XML), com dois perfis:
+Relatórios de entradas e saídas a partir de NF-e, NFC-e, CT-e e NFS-e, com **busca automática das notas na SEFAZ às 6h e às 18h** e acesso seguro para cada cliente.
 
 | Perfil | O que pode fazer |
 |---|---|
-| **ADM** | Cadastrar clientes, definir/gerar e-mail e senha, liberar ou bloquear o acesso, editar dados do CNPJ, importar XMLs (.zip ou soltos), apagar histórico e abrir o relatório de qualquer cliente. |
-| **CLIENTE** | Entrar com o login recebido e ver **somente o próprio** relatório. Não altera e-mail, senha nem dados. |
+| **Escritório (ADM)** | Cadastrar clientes, enviar o certificado A1, ligar a busca na SEFAZ, importar XMLs (.zip ou soltos), ver o relatório de qualquer cliente, acompanhar a atividade do portal. |
+| **Cliente** | Entrar com e-mail, CNPJ ou CPF, ver **somente o próprio** relatório, baixar os XMLs em .zip, trocar a senha e sair de todos os aparelhos. |
+
+## O que mudou na versão 3
+
+**Visual:** mesma identidade do site (fonte Schibsted Grotesk, azul #00509E, laranja #FF8C00, logo SaMe), tela de entrada nova, resumo do mês, situação das notas (canceladas fora dos totais) e painel do escritório em abas.
+
+**Segurança**
+- Sessões guardadas no banco: sair encerra a sessão de verdade, e o cliente pode sair de todos os aparelhos. A sessão cai após 2 h sem uso (1 h para o escritório) e dura no máximo 12 h.
+- O cliente recebe uma **senha provisória** e é obrigado a criar a dele no primeiro acesso (mínimo de 10 caracteres, letras e números, sem senhas comuns).
+- **Verificação em duas etapas** (Google Authenticator etc.) para o escritório.
+- Limite de tentativas por login, por IP e pela combinação dos dois (bloqueio de 15 minutos).
+- Registro de atividade (entradas, tentativas recusadas, alterações, downloads), guardado por 1 ano.
+- Certificados A1 guardados criptografados (AES-256-GCM); a senha do certificado não é armazenada.
+- Bloqueio de requisições vindas de outros sites, cookie `__Host-` com `HttpOnly`/`Secure`/`SameSite=Strict`, cabeçalhos HSTS, CSP sem scripts de terceiros (o JSZip agora vem do próprio portal), `noindex`.
+- CPF/CNPJ validados pelos dígitos verificadores, já aceitando o **CNPJ alfanumérico** (2026).
+
+**Busca automática na SEFAZ** (Distribuição DF-e, NT 2014.002 e 2015.002)
+- Usa o certificado A1 de cada cliente. A SEFAZ entrega as NF-e e CT-e em que o cliente é destinatário/tomador (entradas) dos últimos 90 dias, além dos cancelamentos.
+- **Saídas não vêm pela SEFAZ**: continue importando os XMLs de venda pela aba "Importar XMLs".
+- Sem a ciência da operação, a SEFAZ entrega só o **resumo** da NF-e (suficiente para o relatório). Com a **ciência automática** ligada (por cliente, com autorização dele), o portal registra o evento 210210 e o XML completo chega na busca seguinte.
+- Respeita as regras de consumo da SEFAZ (espera de 1 hora quando não há mais documentos e após o erro 656).
+
+## Publicar ou atualizar na Vercel
+
+1. **Banco de dados:** se ainda não tiver, abra o projeto na Vercel, vá em *Storage* e crie um **Postgres (Neon)** gratuito. Isso cria `DATABASE_URL`.
+2. **Variáveis de ambiente** (*Settings, Environment Variables*). Veja `.env.example`:
+   - `SESSION_SECRET`: já existe se você publicou a versão anterior.
+   - `ENCRYPTION_KEY` (**nova**): texto aleatório com 32+ caracteres. Guarde uma cópia: se mudar, os certificados precisam ser enviados de novo.
+   - `CRON_SECRET` (**nova**): texto aleatório com 16+ caracteres. A Vercel usa nas buscas das 6h e 18h.
+   - `ADMIN_EMAIL` e `ADMIN_PASSWORD`: só para criar o primeiro ADM.
+3. **Enviar o código:** substitua os arquivos do repositório por estes (ou rode `npx vercel --prod` dentro da pasta). Não precisa configurar *build*.
+4. Entre como ADM, ative a verificação em duas etapas (aba Segurança) e envie o certificado A1 de cada cliente.
+
+As tabelas novas são criadas sozinhas no primeiro acesso. Clientes e notas que já existem continuam lá. Todos precisarão entrar de novo uma vez, porque o formato da sessão mudou.
+
+### Horários da busca
+
+O `vercel.json` tem dois agendamentos diários (09:00 e 21:00 UTC, ou seja, **6h e 18h em Brasília**). São dois agendamentos de uma vez por dia porque o plano gratuito (Hobby) da Vercel não aceita um agendamento a cada 12 horas; no plano Hobby o horário pode variar em até 59 minutos. O botão "Buscar agora" na aba "Busca na SEFAZ" roda a busca na hora.
+
+### Cadeia ICP-Brasil
+
+Os servidores da SEFAZ usam certificados da ICP-Brasil, que não vêm no Node.js. Na primeira busca o portal baixa o pacote oficial do ITI (`acraiz.icpbrasil.gov.br`), confere o SHA-512 e guarda no banco por 30 dias. Se a busca mostrar "Falha na conexão segura com a SEFAZ", baixe a cadeia no site do ITI, converta para PEM e cole em `ICP_BRASIL_CA_PEM`.
+
+### Ligar o site ao portal
+
+No `index.html` do site (pasta "01 - Site"), preencha `portalLogin` em `CONFIG` com o endereço do portal na Vercel para o botão "Entrar" da área do cliente levar até aqui.
 
 ## Estrutura
 
 ```
 portal-contabil/
-├── vercel.json            publica a pasta public/ e define cabeçalhos de segurança
-├── package.json
-├── .env.example           variáveis necessárias
-├── api/
-│   └── [...path].js       função serverless única (recebe tudo de /api/*)
-├── lib/                   código do servidor
+├── vercel.json            páginas, cabeçalhos de segurança, agendamentos (cron) e tempo máximo das funções
+├── api/                   funções da Vercel (todas repassam para lib/routes.js)
+├── lib/
 │   ├── routes.js          rotas e regras de acesso (ADM x CLIENTE)
-│   ├── auth.js            senhas (scrypt) e sessão por cookie assinado
-│   ├── db.js              conexão com o Postgres
-│   ├── schema.js          tabelas (criadas sozinhas no 1º acesso)
-│   ├── setup.js           prepara o banco e cria o primeiro ADM
-│   └── http.js            utilitários HTTP
-├── public/                site estático
-│   ├── index.html         login
-│   ├── admin.html         painel do ADM
-│   ├── cliente.html       relatório do cliente
-│   ├── partials/report.html
-│   ├── css/               base, components, report, print
-│   └── js/                api, util, parser, report, login, admin, cliente
-└── tests/                 apoio a testes locais (não é usado em produção)
+│   ├── auth.js            senhas (scrypt) e sessões no banco
+│   ├── totp.js            verificação em duas etapas
+│   ├── vault.js           criptografia dos certificados
+│   ├── pkcs12.js          leitura do certificado A1 (.pfx), sem dependências
+│   ├── sefaz.js           Distribuição DF-e (NF-e/CT-e) e evento de ciência assinado
+│   ├── sync.js            busca automática cliente a cliente
+│   ├── icp.js             cadeia ICP-Brasil
+│   ├── audit.js           registro de atividade
+│   ├── doc.js             CPF/CNPJ (inclusive alfanumérico)
+│   ├── xml.js, db.js, schema.js, setup.js, http.js
+├── public/                site estático (index = entrada, senha, cliente, admin)
+└── tests/                 servidor local e testes (npm test)
 ```
 
-## Publicar na Vercel
+## Rodar localmente
 
-1. **Banco de dados:** no painel da Vercel, abra seu projeto → *Storage* → crie um banco **Postgres (Neon)** gratuito e conecte ao projeto. Isso cria a variável `DATABASE_URL`.
-2. **Variáveis de ambiente** (*Settings → Environment Variables*):
-   - `SESSION_SECRET`: texto aleatório com 32+ caracteres (ex.: gere em https://generate-secret.vercel.app/48).
-   - `ADMIN_EMAIL` e `ADMIN_PASSWORD`: login do primeiro ADM (senha com 8+ caracteres).
-3. **Enviar o código:** suba esta pasta para um repositório no GitHub e importe em vercel.com/new, ou rode `npx vercel --prod` dentro da pasta. Não precisa configurar *build*.
-4. Abra o endereço do projeto e entre com o ADM. As tabelas são criadas automaticamente no primeiro acesso.
-
-`ADMIN_EMAIL`/`ADMIN_PASSWORD` só são usados para criar o primeiro ADM. Depois disso, trocar essas variáveis não altera o ADM existente.
-
-## Tipos de nota aceitos
-
-| Tipo | Como o cliente é identificado |
-|---|---|
-| **NF-e e NFC-e** | Destinatário = **entrada**; emitente = **saída**. NFC-e sem consumidor identificado aparece como "Consumidor não identificado". |
-| **CT-e** (e CT-e OS) | Tomador do frete = **entrada**; emitente = **saída**. |
-| **NFS-e** (padrão nacional e ABRASF) | Tomador = **entrada**; prestador = **saída**. |
-
-MDF-e, eventos e cancelamentos são ignorados (o sistema informa quais). Layouts de NFS-e variam por município: se algum não for lido, envie um exemplo para ajustar.
-
-## Observações
-
-- **Sessão:** cookie assinado, `HttpOnly`, `Secure` e `SameSite=Strict`, válido por 12 h. Bloquear um cliente ou trocar o e-mail/senha dele encerra as sessões abertas dele imediatamente.
-- **Importação:** o `.zip` é aberto no navegador do ADM e enviado em lotes de 1.000 notas (a Vercel limita cada envio a ~4,5 MB). Só entram notas cujo destinatário é o CNPJ/CPF do cliente escolhido; repetidas são ignoradas pela chave de acesso.
-- **Leitura de .zip:** usa a biblioteca JSZip via cdnjs (internet necessária no navegador do ADM).
-- **Tentativas de login:** 5 erros seguidos para o mesmo e-mail e IP bloqueiam por 15 minutos.
+```
+npm run dev     # http://localhost:3100 com banco SQLite local (adm@local.test / adm-local-123)
+npm test
+```

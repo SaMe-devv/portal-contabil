@@ -157,7 +157,10 @@ export async function readFiles(files) {
   const ignored = [];
   const add = (name, xml) => {
     const { note, error } = parseDocument(xml);
-    if (note) notes.push(note);
+    if (note) {
+      note.raw = xml; // XML original: vai compactado para o servidor, para o cliente poder baixar depois
+      notes.push(note);
+    }
     else ignored.push({ name, reason: REASONS[error] });
   };
 
@@ -186,8 +189,18 @@ export async function readFiles(files) {
   return { notes, ignored };
 }
 
-// Campos que seguem para o servidor (sem os perfis de cadastro).
-export const toWire = ({ emitProfile, destProfile, ...wire }) => wire;
+// Campos que seguem para o servidor (sem os perfis de cadastro e sem o XML bruto).
+export const toWire = ({ emitProfile, destProfile, raw, ...wire }) => wire;
+
+// Compacta o XML (gzip) e devolve em base64, para guardar no servidor.
+export async function gzipBase64(text) {
+  if (!window.CompressionStream) return null;
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+  const bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
 
 export function summarizeIgnored(ignored) {
   const byReason = new Map();
