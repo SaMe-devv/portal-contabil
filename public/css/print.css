@@ -1,0 +1,26 @@
+/* Impressão em A4 paisagem, sempre com fundo branco */
+@page { size: A4 landscape; margin: 10mm; }
+
+.print-only { display: none; }
+
+body, .card, tbody tr, input { background: #fff !important; color: #000 !important; }
+th, dl.info dt, .caption { color: #444 !important; }
+body { font-size: 10px; }
+
+.noprint, .topbar { display: none !important; }
+.wrap { max-width: none; padding: 0; }
+.card { border: 0; padding: 0; margin-top: 12px; }
+
+.scroll, .ranking { overflow: visible; max-height: none; }
+table { min-width: 0; }
+th, td { padding: 3px 5px; }
+tr { break-inside: avoid; }
+thead { display: table-header-group; }
+dl.info { grid-template-columns: repeat(4, 1fr); gap: 8px 14px; }
+
+.bb, .ln { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+#chart { break-inside: avoid; }
+.chart-svg { color: #444 !important; }
+.gl { stroke: #ccc !important; }
+.ln { stroke: #0f5c4d !important; }
+.bb { fill: #8cc0b2 !important; }

@@ -1,0 +1,28 @@
+/* Blocos do relatório: cliente, notas, ranking e gráfico */
+.report-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.report h1 { padding-left: 14px; border-left: 4px solid var(--acc); }
+
+dl.info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px 20px;
+  margin: 0;
+}
+dl.info dt { font-size: .8em; color: var(--mut); }
+dl.info dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+.caption { margin: 0 0 10px; font-size: .85em; color: var(--mut); }
+.ranking { max-height: 480px; overflow: auto; }
+.month-select { max-width: 200px; margin-bottom: 10px; }
+
+.chart-svg { display: block; width: 100%; min-width: 640px; height: auto; color: var(--mut); font-size: 11px; }
+.gl { stroke: var(--rule); stroke-width: 1; }
+.bb { fill: var(--bar); }
+.ln { fill: none; stroke: var(--acc); stroke-width: 2.5; stroke-linejoin: round; }

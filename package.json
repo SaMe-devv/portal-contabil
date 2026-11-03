@@ -1,0 +1,13 @@
+{
+  "name": "portal-contabil",
+  "version": "2.0.0",
+  "description": "Portal de relatórios de entradas/compras (NF-e) com acesso ADM e CLIENTES, pronto para a Vercel.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}
