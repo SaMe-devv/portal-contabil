@@ -7,7 +7,7 @@
   padding: clamp(28px, 5vw, 64px); display: flex; flex-direction: column; gap: 40px;
 }
 .painel-marca .marca { color: #fff; }
-.painel-marca .marca svg { background: #fff; border-radius: 12px; padding: 3px; width: 40px; height: 40px; }
+.painel-marca .marca img { background: #fff; border-radius: var(--raio-p); padding: 6px; width: 48px; height: 52px; box-sizing: content-box; }
 .painel-marca .marca small { color: rgba(255, 255, 255, .72); }
 .painel-marca h1 { color: #fff; font-size: clamp(36px, 4.6vw, 60px); line-height: .98; max-width: 12ch; margin-top: auto; }
 .painel-marca .lead { color: rgba(255, 255, 255, .82); margin-top: 18px; max-width: 44ch; }
@@ -18,16 +18,18 @@
 .painel-marca li b { display: block; font-weight: 600; font-size: 15.5px; }
 .painel-marca li span { font-size: 14px; color: rgba(255, 255, 255, .75); }
 /* o bloco laranja do site, saindo do canto */
-.painel-marca::after { content: ""; position: absolute; right: -60px; bottom: -60px; width: 220px; height: 220px; border-radius: var(--raio-g); background: var(--laranja); }
+/* os quadrados da logo, saindo pelo canto: um verde e um laranja, separados pela linha branca */
+.painel-marca::before { content: ""; position: absolute; right: 150px; bottom: -40px; width: 170px; height: 170px; border-radius: var(--raio-g); background: var(--teal); box-shadow: 0 0 0 6px #fff; }
+.painel-marca::after { content: ""; position: absolute; right: -40px; bottom: 90px; width: 170px; height: 170px; border-radius: var(--raio-g); background: var(--laranja); box-shadow: 0 0 0 6px #fff; }
 .painel-marca > * { position: relative; z-index: 1; }
 
 .lado-form { display: grid; place-items: center; padding: clamp(24px, 5vw, 64px) var(--gutter); background: var(--nevoa); }
 .cartao-login {
   width: min(440px, 100%); background: #fff; border: 1px solid var(--linha); border-radius: var(--raio-g);
-  padding: clamp(24px, 3.5vw, 40px); box-shadow: 0 24px 60px -32px rgba(6, 43, 82, .35); position: relative;
+  padding: clamp(24px, 3.5vw, 40px); box-shadow: 0 24px 60px -32px rgba(15, 47, 50, .35); position: relative;
   display: grid; gap: 18px;
 }
-.cartao-login::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; border-radius: var(--raio-g) var(--raio-g) 0 0; background: linear-gradient(90deg, var(--azul) 0 70%, var(--laranja) 70%); }
+.cartao-login::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; border-radius: var(--raio-g) var(--raio-g) 0 0; background: linear-gradient(90deg, var(--teal) 0 calc(62% - 4px), #fff calc(62% - 4px) 62%, var(--laranja) 62%); }
 .cartao-login h2 { font-size: 28px; }
 .cartao-login > p { color: var(--suave); font-size: 15.5px; margin-top: -10px; }
 .cartao-login .btn { width: 100%; min-height: 52px; font-size: 16px; }
@@ -48,6 +50,7 @@
   .painel-marca { gap: 22px; padding-bottom: 36px; }
   .painel-marca h1 { margin-top: 8px; font-size: 34px; }
   .painel-marca ul, .painel-marca .lead { display: none; }
-  .painel-marca::after { width: 120px; height: 120px; right: -40px; bottom: -40px; }
+  .painel-marca::before { width: 90px; height: 90px; right: 64px; bottom: -30px; }
+  .painel-marca::after { width: 90px; height: 90px; right: -30px; bottom: 36px; }
   .lado-form { place-items: start center; }
 }

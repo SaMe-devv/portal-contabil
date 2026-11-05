@@ -9,7 +9,7 @@ Relatórios de entradas e saídas a partir de NF-e, NFC-e, CT-e e NFS-e, com **b
 
 ## O que mudou na versão 3
 
-**Visual:** mesma identidade do site (fonte Schibsted Grotesk, azul #00509E, laranja #FF8C00, logo SaMe), tela de entrada nova, resumo do mês, situação das notas (canceladas fora dos totais) e painel do escritório em abas.
+**Visual:** identidade da logo SaMe (verde-petróleo #008E97, laranja #F58220, fontes Montserrat e Open Sans, cantos retos como os quadrados da logo), tela de entrada nova, resumo do mês, situação das notas (canceladas fora dos totais) e painel do escritório em abas. A logo está em `public/img/` (`logo-marca.png`, `logo-same-completa.png` e os favicons).
 
 **Segurança**
 - Sessões guardadas no banco: sair encerra a sessão de verdade, e o cliente pode sair de todos os aparelhos. A sessão cai após 2 h sem uso (1 h para o escritório) e dura no máximo 12 h.
