@@ -265,6 +265,41 @@
     </form>
   </dialog>
 
+  <!-- Janela: busca retroativa -->
+  <dialog id="dlgRetro" aria-labelledby="retroTitle">
+    <form class="janela" id="retroForm" method="dialog" novalidate>
+      <div class="janela-cab">
+        <div><h2 id="retroTitle">Busca retroativa</h2><p id="retroSub"></p></div>
+        <button class="btn btn-contorno btn-icone" type="button" data-fechar aria-label="Fechar"><svg aria-hidden="true"><use href="img/icons.svg#i-x"/></svg></button>
+      </div>
+      <p class="aviso">A SEFAZ guarda as notas por <strong>90 dias</strong> e libera no máximo <strong>20 consultas por hora</strong> neste tipo de busca. O portal faz 18 por hora, sozinho, até terminar. Notas mais antigas que 90 dias só entram pela aba "Importar XMLs".</p>
+      <p class="aviso alerta" id="retroCoberto" hidden>A primeira busca deste cliente começou do zero, então os últimos 90 dias já foram baixados. A busca retroativa só ajuda se outro sistema tiver baixado parte das notas ou se você tiver chaves específicas.</p>
+      <div class="grade">
+        <div class="campo">
+          <label for="retroDe">Buscar notas recebidas a partir de</label>
+          <input id="retroDe" type="date">
+          <small id="retroDeAjuda"></small>
+        </div>
+        <div class="campo">
+          <span>Como buscar</span>
+          <label class="check"><input type="checkbox" id="retroSeq" checked> Percorrer a sequência da SEFAZ (todas as notas do período)</label>
+        </div>
+        <div class="campo largo">
+          <label for="retroChaves">Chaves de acesso de NF-e (opcional)</label>
+          <textarea id="retroChaves" rows="4" placeholder="Cole as chaves de 44 números, uma por linha. Elas são buscadas primeiro, direto na nota."></textarea>
+          <small><label class="link-arquivo" for="retroArq">Ou carregue um arquivo .txt ou .csv com as chaves</label> <span id="retroConta"></span></small>
+          <input id="retroArq" type="file" accept=".txt,.csv,text/plain,text/csv" hidden>
+        </div>
+      </div>
+      <p class="muted small" id="retroEstimativa"></p>
+      <p class="aviso erro" id="retroMsg" role="alert" hidden></p>
+      <div class="rodape">
+        <button class="btn btn-contorno" type="button" data-fechar>Fechar</button>
+        <button class="btn" type="submit" id="retroIniciar"><svg aria-hidden="true"><use href="img/icons.svg#i-cal"/></svg>Iniciar busca retroativa</button>
+      </div>
+    </form>
+  </dialog>
+
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>

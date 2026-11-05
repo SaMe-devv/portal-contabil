@@ -59,7 +59,7 @@ function accessBadge(c) {
 }
 
 function syncBadge(c) {
-  const map = { ok: ['ok', 'Concluída'], erro: ['off', 'Com erro'], aguardando: ['espera', 'Aguardando SEFAZ'], ocupado: ['espera', 'Em andamento'] };
+  const map = { ok: ['ok', 'Concluída'], erro: ['off', 'Com erro'], aguardando: ['espera', 'Pausada pela SEFAZ'], conflito: ['off', 'Outro sistema consultando'], ocupado: ['espera', 'Em andamento'] };
   const [cls, label] = map[c.sync_status] || ['neutro', 'Ainda não buscou'];
   return `<span class="selo ${cls}">${label}</span>`;
 }
@@ -94,6 +94,21 @@ function drawClients() {
     + `${expiring ? `, ${expiring} certificado(s) vencido(s) ou vencendo em 30 dias` : ''}.`;
 }
 
+// Andamento da busca retroativa (até 90 dias).
+function backfillInfo(c) {
+  const done = Number(c.sync_backfill_done) || 0;
+  const calls = Number(c.sync_backfill_calls) || 0;
+  const running = Boolean(c.sync_backfill || c.sync_backfill_keys);
+  if (!running) return done ? `<span class="recup">Busca retroativa concluída: ${done} nota(s) recuperada(s).</span>` : '';
+  const keysLeft = c.sync_backfill_keys ? JSON.parse(c.sync_backfill_keys).length : 0;
+  const next = Number(c.sync_backfill_next);
+  const when = next > Date.now() ? `Próxima leva às ${new Date(next).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.` : 'Próxima leva na próxima hora.';
+  const since = c.sync_backfill_since ? ` desde ${c.sync_backfill_since.split('-').reverse().join('/')}` : '';
+  return `<span class="recup"><span class="selo espera">Busca retroativa${since}</span>
+    ${done} nota(s) recuperada(s) em ${calls} consulta(s)${keysLeft ? `, ${keysLeft} chave(s) na fila` : ''}. ${when}
+    <button class="link" type="button" data-act="retro-cancel" data-id="${c.id}">Cancelar busca retroativa</button></span>`;
+}
+
 function drawSync() {
   const list = clients;
   $('#syncRows').innerHTML = list.length
@@ -106,9 +121,9 @@ function drawSync() {
           <td>${certBadge(c)}</td>
           <td><label class="chave"><input type="checkbox" data-sync="enabled" ${enabled ? 'checked' : ''} ${hasCert ? '' : 'disabled'}><i></i><span class="sr">Busca automática para ${esc(c.nome)}</span></label></td>
           <td><label class="chave"><input type="checkbox" data-sync="ciencia" ${c.sync_ciencia ? 'checked' : ''} ${hasCert ? '' : 'disabled'}><i></i><span class="sr">Ciência automática para ${esc(c.nome)}</span></label></td>
-          <td class="msg-sync">${syncBadge(c)}<b>${c.sync_last ? fmtDateTime(c.sync_last) : ''}</b>${esc(c.sync_msg || '')}</td>
+          <td class="msg-sync">${syncBadge(c)}<b>${c.sync_last ? fmtDateTime(c.sync_last) : ''}</b>${esc(c.sync_msg || '')}${backfillInfo(c)}</td>
           <td><div class="acoes">${hasCert
-            ? `<button class="btn btn-sm btn-contorno" data-act="sync" data-id="${c.id}">${icon('i-refresh')}Buscar agora</button>`
+            ? `<button class="btn btn-sm btn-contorno" data-act="sync" data-id="${c.id}">${icon('i-refresh')}Buscar agora</button>${c.sync_backfill || c.sync_backfill_keys ? '' : `<button class="btn btn-sm btn-contorno" data-act="backfill" data-id="${c.id}">${icon('i-cal')}Busca retroativa</button>`}`
             : `<button class="btn btn-sm btn-contorno" data-act="cert" data-id="${c.id}">${icon('i-key')}Enviar certificado</button>`}</div></td>
         </tr>`;
     }).join('')
@@ -132,11 +147,18 @@ async function onTableClick(event) {
     if (button.dataset.act === 'report') await openReport(id);
     if (button.dataset.act === 'edit') openForm(client);
     if (button.dataset.act === 'cert') openCert(client);
+    if (button.dataset.act === 'backfill') openRetro(client);
+    if (button.dataset.act === 'retro-cancel') {
+      if (!window.confirm(`Cancelar a busca retroativa de ${client.nome}? As notas já recuperadas continuam no portal.`)) return;
+      await api(`/api/admin/clients/${id}/backfill`, { method: 'DELETE' });
+      await loadClients();
+    }
     if (button.dataset.act === 'sync') {
       button.disabled = true;
       button.lastChild.textContent = 'Buscando…';
-      await api(`/api/admin/clients/${id}/sync`, { method: 'POST' });
+      const r = await api(`/api/admin/clients/${id}/sync`, { method: 'POST' });
       await loadClients();
+      if (r.status === 'ocupado') window.alert(r.message);
     }
   } catch (error) {
     window.alert(error.message);
@@ -330,6 +352,76 @@ $('#certRemover').addEventListener('click', async () => {
   } catch (error) {
     showMsg($('#certMsg'), error.message);
   }
+});
+
+/* ---------- busca retroativa ---------- */
+
+const dlgRetro = $('#dlgRetro');
+let retroId = null;
+const isoDay = (ms) => new Date(ms - 3 * 3600 * 1000).toISOString().slice(0, 10);
+const extractKeys = (textValue) => [...new Set((String(textValue).match(/\d{44}/g) || []))];
+
+function updateRetroInfo() {
+  const keys = extractKeys($('#retroChaves').value);
+  $('#retroConta').textContent = keys.length ? `${keys.length} chave(s) reconhecida(s).` : '';
+  const seq = $('#retroSeq').checked;
+  const parts = [];
+  if (keys.length) parts.push(`${keys.length} chave(s): cerca de ${Math.ceil(keys.length / 18)} hora(s)`);
+  if (seq) parts.push('sequência: depende do volume do cliente (cada consulta traz uma nota ou evento; um cliente com 300 notas no período leva cerca de 17 horas)');
+  $('#retroEstimativa').textContent = parts.length ? `Tempo estimado: ${parts.join('; ')}. Começa agora (ou assim que a cota da hora liberar).` : 'Escolha pelo menos uma forma de busca.';
+}
+
+function openRetro(client) {
+  retroId = client.id;
+  $('#retroSub').textContent = `${client.nome} · ${fmtDoc(client.doc)}`;
+  const min = isoDay(Date.now() - 90 * 24 * 3600 * 1000);
+  $('#retroDe').min = min;
+  $('#retroDe').max = isoDay(Date.now());
+  $('#retroDe').value = min;
+  $('#retroDeAjuda').textContent = `O mais antigo que a SEFAZ ainda guarda: ${min.split('-').reverse().join('/')}.`;
+  $('#retroSeq').checked = true;
+  $('#retroChaves').value = '';
+  $('#retroCoberto').hidden = !client.sync_janela_ok;
+  $('#retroIniciar').hidden = false;
+  showMsg($('#retroMsg'), '');
+  updateRetroInfo();
+  openDialog(dlgRetro);
+}
+
+['input', 'change'].forEach((t) => {
+  $('#retroChaves').addEventListener(t, updateRetroInfo);
+  $('#retroSeq').addEventListener(t, updateRetroInfo);
+});
+$('#retroArq').addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const keys = extractKeys(await file.text());
+  $('#retroChaves').value = [...new Set([...extractKeys($('#retroChaves').value), ...keys])].join('\n');
+  updateRetroInfo();
+});
+
+$('#retroForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const chaves = extractKeys($('#retroChaves').value);
+  const porSequencia = $('#retroSeq').checked;
+  if (!chaves.length && !porSequencia) return showMsg($('#retroMsg'), 'Marque a busca pela sequência ou informe chaves de acesso.');
+  const button = $('#retroIniciar');
+  button.disabled = true;
+  showMsg($('#retroMsg'), 'Iniciando a primeira leva na SEFAZ…', 'info');
+  try {
+    const r = await api(`/api/admin/clients/${retroId}/backfill`, { method: 'POST', body: { since: $('#retroDe').value, chaves, porSequencia } });
+    const extra = r.jaTinha ? ` ${r.jaTinha} chave(s) já estavam no portal com XML completo.` : '';
+    const first = r.primeira?.message ? ` Primeira leva: ${r.primeira.message}.`
+      : r.proxima > Date.now() ? ` A cota de consultas desta hora já foi usada; a primeira leva começa às ${new Date(r.proxima).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.` : '';
+    button.hidden = true; // evita iniciar duas vezes
+    showMsg($('#retroMsg'), `Busca retroativa iniciada desde ${r.since.split('-').reverse().join('/')}.${extra}${first} O andamento aparece na aba Busca na SEFAZ.`, 'ok');
+    await loadClients();
+  } catch (error) {
+    showMsg($('#retroMsg'), error.message);
+  }
+  button.disabled = false;
+  return undefined;
 });
 
 /* ---------- importação em lote ---------- */

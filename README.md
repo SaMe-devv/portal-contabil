@@ -44,6 +44,28 @@ As tabelas novas são criadas sozinhas no primeiro acesso. Clientes e notas que 
 
 O `vercel.json` tem dois agendamentos diários (09:00 e 21:00 UTC, ou seja, **6h e 18h em Brasília**). São dois agendamentos de uma vez por dia porque o plano gratuito (Hobby) da Vercel não aceita um agendamento a cada 12 horas; no plano Hobby o horário pode variar em até 59 minutos. O botão "Buscar agora" na aba "Busca na SEFAZ" roda a busca na hora.
 
+### Busca retroativa (notas de até 90 dias atrás)
+
+A SEFAZ guarda as notas por 90 dias depois de recebê-las. Notas mais antigas não podem mais ser baixadas por ela: importe o XML pela aba "Importar XMLs".
+
+- **CNPJ que nenhum outro sistema consulta:** a primeira busca já traz os últimos 90 dias.
+- **Botão "Busca retroativa"** (aba Busca na SEFAZ): abre uma janela onde você escolhe a data inicial (no máximo 90 dias atrás) e, se quiser, cola ou carrega um .txt/.csv com chaves de acesso de NF-e.
+  - **Por chave:** busca direto cada nota informada. Funciona mesmo quando outro sistema disputa o CNPJ na SEFAZ. Chaves que já têm XML completo no portal são ignoradas.
+  - **Pela sequência da SEFAZ:** percorre as notas do cliente da mais recente para a mais antiga, até a data escolhida. Recupera também o que outro sistema baixou antes.
+- **Ritmo:** a SEFAZ libera no máximo 20 consultas desse tipo por hora, então o portal faz 18 por hora, sozinho, nos horários de hora em hora do `vercel.json`. Cada consulta traz uma nota ou evento: um cliente com 300 notas no período leva cerca de 17 horas.
+- O andamento aparece na linha do cliente, com a opção "Cancelar busca retroativa". As notas já recuperadas continuam no portal.
+- Quando a consulta normal recebe o erro 656, o trecho que outro sistema já baixou entra sozinho na busca retroativa.
+
+O `vercel.json` tem 24 agendamentos diários (o plano Hobby permite até 100, cada um uma vez por dia): 2 de busca completa (6h e 18h) e 22 de busca retroativa.
+
+### Erro 656 "Consumo indevido"
+
+A SEFAZ trata todos os sistemas que consultam o mesmo CNPJ como um só e exige que eles sigam a mesma sequência de NSU. Se o emissor, o ERP do cliente, o sistema contábil ou outro portal (Qive, SIEG etc.) já baixou as notas desse CNPJ, a primeira consulta do portal é recusada com o erro 656 e as consultas do CNPJ ficam pausadas por 1 hora.
+
+- O portal guarda a posição que a SEFAZ informa e continua sozinho depois de 1 hora. Não é preciso fazer nada.
+- As notas que o outro sistema já baixou entram na **recuperação automática**: o portal busca uma por uma (consulta por NSU), do mais recente para o mais antigo, até o limite de 90 dias.
+- Se o erro voltar ("Outro sistema consultando"), os dois sistemas estão disputando o mesmo CNPJ. Deixe só um deles com a consulta automática na SEFAZ para esse cliente.
+
 ### Cadeia ICP-Brasil
 
 Os servidores da SEFAZ usam certificados da ICP-Brasil, que não vêm no Node.js. Na primeira busca o portal baixa o pacote oficial do ITI (`acraiz.icpbrasil.gov.br`), confere o SHA-512 e guarda no banco por 30 dias. Se a busca mostrar "Falha na conexão segura com a SEFAZ", baixe a cadeia no site do ITI, converta para PEM e cole em `ICP_BRASIL_CA_PEM`.
